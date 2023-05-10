@@ -89,7 +89,7 @@ public class App {
         LOG.info("Printed Pipeline options");
         Pipeline pipeline = Pipeline.create(options);
 
-        // now we connect to the queue and process every event
+        // It now connects to the queue and processes every event.
         // The pipeline.apply() method reads data from the Redpanda topic using the KafkaIO.read() method
         PCollection<String> data = pipeline.apply(
                 "ReadFromKafka",
