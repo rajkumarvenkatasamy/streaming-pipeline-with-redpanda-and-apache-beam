@@ -28,7 +28,7 @@ public class App {
 
 
     /**
-     * Specific pipeline options.
+     * Specific pipeline options
      */
     public interface Options extends PipelineOptions {
         @Description("Kafka Bootstrap Servers")
@@ -58,8 +58,8 @@ public class App {
     }
 
     /**
-     * Filters only the events from the southern region and enrich the data with the state description
-      */
+     * Filter only the events from the southern region and enrich the data with the state description
+     */
     private static EnrichedUserActivity filterAndEnrichEvents(String row) throws JsonProcessingException {
         StateAndRegion stateAndRegion = new StateAndRegion();
         EnrichedUserActivity enrichedUserActivity = new EnrichedUserActivity();
@@ -79,7 +79,7 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         // PipelineOptionsFactory.fromArgs(args) creates an instance of PipelineOptions from the
-        // command-line arguments passed to the application.
+        // command line arguments passed to the application.
         // PipelineOptions is a configuration interface that provides a way to set options for a pipeline,
         // such as the runner to use, the number of workers, and any pipeline-specific options.
         Options options = PipelineOptionsFactory.fromArgs(args)
@@ -90,7 +90,7 @@ public class App {
         Pipeline pipeline = Pipeline.create(options);
 
         // It now connects to the queue and processes every event.
-        // The pipeline.apply() method reads data from the Redpanda topic using the KafkaIO.read() method
+        // The pipeline.apply() method reads data from the Redpanda topic using the KafkaIO.read() method.
         PCollection<String> data = pipeline.apply(
                 "ReadFromKafka",
                 KafkaIO.<String, String> read()
@@ -101,7 +101,7 @@ public class App {
                         .withKeyDeserializer(StringDeserializer.class)
                         .withValueDeserializer(StringDeserializer.class)
                         .withoutMetadata()).apply("ExtractPayload",
-                // The Values.create() method is used to extract the values from the Kafka records read from the topic
+                // The Values.create() method extracts the values from the Kafka records read from the topic.
                 Values.<String> create());
 
         data.apply(ParDo.of(new DoFn<String, String>() {
@@ -112,9 +112,9 @@ public class App {
             }
         }));
 
-        // We first filter the events coming from the states that belong to Southern region and
-        // enrich the event information by transforming the state code to state description.
-        // Finally, write the Southern region events to its own Topic
+        // The code below filters the events coming from the states that belong to the southern region, then
+        // enriches the event information by transforming the state code into the state description.
+        // Finally, it writes the southern region's events to their own topic.
 
         PCollection<String> enrichedAndSegregatedEvents = data.apply("Filter and Enrich Event Information",
                 ParDo.of(new DoFn<String, String>() {
@@ -145,7 +145,7 @@ public class App {
                             }
                         }));
 
-        // The above filtered and enriched events are published to the destination topic
+        // Publish the above filtered and enriched events to the destination topic
         eventsKV
                 .apply("WriteToKafka",
                         KafkaIO.<String, String> write()
@@ -160,7 +160,7 @@ public class App {
         // Initiate the pipeline execution
         PipelineResult run = pipeline.run();
         // The waitUntilFinish method is used to block the main thread until the pipeline execution is complete or
-        // until the specified duration has elapsed. In this case, the duration is set as -1 and hence the pipeline
+        // until the specified duration has elapsed. In this case, the duration is set to -1 and hence the pipeline
         // will continue running until it is explicitly terminated or encounters an error.
         run.waitUntilFinish(Duration.standardSeconds(options.getDuration()));
     }
